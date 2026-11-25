@@ -1,172 +1,93 @@
-gsap.utils.toArray(".animate-fade").forEach(el => {
-    gsap.from(el, {
-        opacity: 0,
-        y: 40,
-        duration: 1,
-        scrollTrigger: {
-            trigger: el,
-            start: "top 80%"
-        }
-    });
-});
+// Nexlon Media — portfolio interactions (dependency-free)
 
-gsap.from(".animate-slide", {
-    x: -100,
-    opacity: 0,
-    duration: 1,
-    scrollTrigger: {
-        trigger: ".animate-slide",
-        start: "top 80%"
-    }
-});
-
-gsap.from(".animate-slide-left", {
-    x: -50,
-    opacity: 0,
-    duration: 1,
-    scrollTrigger: {
-        trigger: ".animate-slide-left",
-        start: "top 80%"
-    }
-});
-
-gsap.from(".animate-slide-right", {
-    x: 50,
-    opacity: 0,
-    duration: 1,
-    scrollTrigger: {
-        trigger: ".animate-slide-right",
-        start: "top 80%"
-    }
-});
-
-gsap.utils.toArray(".animate-module").forEach((el, index) => {
-    gsap.from(el, {
-        scale: 0.8,
-        opacity: 0,
-        duration: 0.5,
-        delay: index * 0.2,
-        scrollTrigger: {
-            trigger: el,
-            start: "top 80%"
-        }
-    });
-});
-
-document.querySelectorAll(".module-item").forEach(item => {
-    item.addEventListener("click", () => {
-        const details = item.querySelector(".module-details");
-        details.style.display = details.style.display === "block" ? "none" : "block";
-    });
-});
-
-const typewriter = document.querySelector(".typewriter");
-const text = typewriter.textContent;
-typewriter.textContent = "";
-let i = 0;
-function type() {
-    if (i < text.length) {
-        typewriter.textContent += text.charAt(i);
-        i++;
-        setTimeout(type, 50);
-    }
+// Sticky nav shrink on scroll
+var nav = document.querySelector('.nav');
+function onScroll() {
+  if (window.scrollY > 12) { nav.classList.add('scrolled'); }
+  else { nav.classList.remove('scrolled'); }
 }
-gsap.from(typewriter, {
-    opacity: 0,
-    duration: 1,
-    scrollTrigger: {
-        trigger: typewriter,
-        start: "top 80%",
-        onEnter: () => type()
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// Mobile nav toggle
+var navToggle = document.getElementById('navToggle');
+var navLinks = document.getElementById('navLinks');
+navToggle.addEventListener('click', function () {
+  var open = navLinks.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+navLinks.querySelectorAll('a').forEach(function (a) {
+  a.addEventListener('click', function () { navLinks.classList.remove('open'); });
+});
+
+// Scroll reveal
+var revealObserver = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
     }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(function (el) {
+  revealObserver.observe(el);
 });
 
-const cursorDot = document.querySelector(".cursor-dot");
-document.addEventListener("mousemove", (e) => {
-    cursorDot.style.left = e.clientX + "px";
-    cursorDot.style.top = e.clientY + "px";
+// Hero kinetic word rotation
+var words = ['Branding', 'Social', 'Video', 'Motion'];
+var wordEl = document.getElementById('rotatorWord');
+var wordIndex = 0;
+setInterval(function () {
+  wordIndex = (wordIndex + 1) % words.length;
+  wordEl.style.opacity = 0;
+  setTimeout(function () {
+    wordEl.textContent = words[wordIndex];
+    wordEl.style.opacity = 1;
+  }, 250);
+}, 2200);
+wordEl.style.transition = 'opacity .25s ease';
+
+// Gallery filter
+var filterBtns = document.querySelectorAll('.filter-btn');
+var workItems = document.querySelectorAll('.work-item');
+filterBtns.forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    filterBtns.forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var filter = btn.getAttribute('data-filter');
+    workItems.forEach(function (item) {
+      var show = filter === 'all' || item.getAttribute('data-category') === filter;
+      item.classList.toggle('hidden', !show);
+    });
+  });
 });
 
-const portfolioGrid = document.querySelector(".portfolio-grid");
-const leftArrow = document.querySelector(".left-arrow");
-const rightArrow = document.querySelector(".right-arrow");
-
-leftArrow.addEventListener("click", () => {
-    portfolioGrid.scrollBy({ left: -300, behavior: "smooth" });
+// Lightbox
+var lightbox = document.getElementById('lightbox');
+var lightboxImg = document.getElementById('lightboxImg');
+var lightboxCaption = document.getElementById('lightboxCaption');
+var lightboxClose = document.getElementById('lightboxClose');
+workItems.forEach(function (item) {
+  item.addEventListener('click', function () {
+    var img = item.querySelector('img');
+    var caption = item.querySelector('figcaption strong');
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt;
+    lightboxCaption.textContent = caption ? caption.textContent + ' — Design sample' : '';
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  });
 });
-
-rightArrow.addEventListener("click", () => {
-    portfolioGrid.scrollBy({ left: 300, behavior: "smooth" });
-});
-
-document.querySelectorAll(".logos-container, .portfolio-grid").forEach(container => {
-    container.addEventListener("mouseenter", () => {
-        cursorDot.classList.add("expand");
-    });
-    container.addEventListener("mouseleave", () => {
-        cursorDot.classList.remove("expand");
-    });
-
-    let isDragging = false;
-    let startX;
-    let scrollLeft;
-
-    container.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        container.classList.add("dragging");
-        startX = e.pageX - container.offsetLeft;
-        scrollLeft = container.scrollLeft;
-    });
-
-    container.addEventListener("mouseleave", () => {
-        isDragging = false;
-        container.classList.remove("dragging");
-    });
-
-    container.addEventListener("mouseup", () => {
-        isDragging = false;
-        container.classList.remove("dragging");
-    });
-
-    container.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const walk = (x - startX) * 2;
-        container.scrollLeft = scrollLeft - walk;
-    });
-});
-
-const sendMessageBtn = document.querySelector(".send-message-btn");
-function createRipple(event) {
-    const button = event.currentTarget;
-    const rect = button.getBoundingClientRect();
-    const diameter = Math.max(rect.width, rect.height);
-    const radius = diameter / 2;
-
-    const ripple = document.createElement("span");
-    ripple.classList.add("ripple");
-
-    const touchX = event.clientX || (event.touches && event.touches[0].clientX);
-    const touchY = event.clientY || (event.touches && event.touches[0].clientY);
-
-    const x = touchX - rect.left - radius;
-    const y = touchY - rect.top - radius;
-
-    ripple.style.width = `${diameter}px`;
-    ripple.style.height = `${diameter}px`;
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-
-    button.appendChild(ripple);
-
-    ripple.addEventListener("animationend", () => {
-        ripple.remove();
-    });
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  lightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
 }
-
-sendMessageBtn.addEventListener("mousedown", createRipple);
-sendMessageBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    createRipple(e);
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', function (e) {
+  if (e.target === lightbox) { closeLightbox(); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { closeLightbox(); }
 });
